@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils'
 import { type ButtonHTMLAttributes, forwardRef } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'destructive'
-type Size = 'sm' | 'md' | 'lg'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'destructive'
+type Size = 'xs' | 'sm' | 'md' | 'lg'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant
@@ -11,16 +11,18 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantClasses: Record<Variant, string> = {
-  primary:     'bg-sky-500 text-white hover:bg-sky-600 shadow-sm',
-  secondary:   'bg-slate-100 text-slate-800 hover:bg-slate-200',
-  ghost:       'bg-transparent text-slate-600 hover:bg-slate-100',
-  destructive: 'bg-red-500 text-white hover:bg-red-600',
+  primary:     'bg-indigo-600 text-white border border-indigo-700/30 hover:bg-indigo-700 shadow-sm',
+  secondary:   'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-sm',
+  ghost:       'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900',
+  outline:     'bg-white text-slate-700 border border-slate-300 hover:bg-slate-50',
+  destructive: 'bg-red-600 text-white border border-red-700/30 hover:bg-red-700 shadow-sm',
 }
 
 const sizeClasses: Record<Size, string> = {
-  sm: 'px-3 py-1.5 text-xs',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-5 py-2.5 text-base',
+  xs: 'h-7 px-2.5 text-xs gap-1.5 rounded-md',
+  sm: 'h-8 px-3 text-sm gap-1.5 rounded-lg',
+  md: 'h-9 px-4 text-sm gap-2 rounded-lg',
+  lg: 'h-10 px-5 text-sm gap-2 rounded-lg',
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -29,9 +31,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       ref={ref}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors',
-        'focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2',
-        'disabled:opacity-50 disabled:cursor-not-allowed',
+        'inline-flex items-center justify-center font-medium transition-all duration-150',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-1',
+        'disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none',
+        'active:scale-[0.97]',
         variantClasses[variant],
         sizeClasses[size],
         className
@@ -39,7 +42,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       {...props}
     >
       {loading && (
-        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+        <span className="h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-current border-t-transparent" />
       )}
       {children}
     </button>
