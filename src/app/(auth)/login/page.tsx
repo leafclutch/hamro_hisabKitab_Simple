@@ -3,9 +3,9 @@
 import { login } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { AlertCircle, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
@@ -21,10 +21,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-8">
-      <h2 className="mb-6 text-xl font-semibold text-white">Sign in to your account</h2>
+    <div>
+      <div className="mb-7">
+        <h1 className="text-[22px] font-bold text-slate-900 tracking-tight">Welcome back</h1>
+        <p className="mt-1 text-sm text-slate-500">Sign in to your account to continue</p>
+      </div>
 
-      <form action={handleSubmit} className="flex flex-col gap-4">
+      <form action={handleSubmit} className="space-y-4">
         <Input
           id="email"
           name="email"
@@ -33,13 +36,20 @@ export default function LoginPage() {
           placeholder="you@company.com"
           required
           autoComplete="email"
-          className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:ring-sky-400"
         />
 
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-sm font-medium text-slate-300">
-            Password
-          </label>
+        <div className="space-y-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-sm font-medium text-slate-700">
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-indigo-600 hover:text-indigo-700 font-medium hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <input
               id="password"
@@ -48,37 +58,30 @@ export default function LoginPage() {
               placeholder="••••••••"
               required
               autoComplete="current-password"
-              className="w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 pr-10 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent"
+              className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 pr-11 text-sm text-slate-900 placeholder:text-slate-400 transition-all focus:outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
             />
             <button
               type="button"
               onClick={() => setShowPassword(v => !v)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+              tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
             </button>
           </div>
         </div>
 
         {error && (
-          <p className="rounded-md bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
-            {error}
-          </p>
+          <div className="flex items-start gap-2.5 rounded-lg bg-red-50 border border-red-100 px-3.5 py-3">
+            <AlertCircle size={15} className="mt-0.5 flex-shrink-0 text-red-500" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
         )}
 
-        <Button type="submit" loading={isPending} className="mt-1 w-full">
+        <Button type="submit" loading={isPending} className="w-full mt-1.5">
           {isPending ? 'Signing in…' : 'Sign in'}
         </Button>
       </form>
-
-      <div className="mt-4 text-center">
-        <Link
-          href="/forgot-password"
-          className="text-sm text-sky-400 hover:text-sky-300 hover:underline"
-        >
-          Forgot your password?
-        </Link>
-      </div>
     </div>
   )
 }

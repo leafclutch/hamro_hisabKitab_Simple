@@ -3,9 +3,9 @@
 import { forgotPassword } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { AlertCircle, ArrowLeft, MailCheck } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
-import { ArrowLeft, CheckCircle } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null)
@@ -21,50 +21,66 @@ export default function ForgotPasswordPage() {
     })
   }
 
+  if (sent) {
+    return (
+      <div className="text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+          <MailCheck size={24} className="text-emerald-600" />
+        </div>
+        <h2 className="text-lg font-semibold text-slate-900">Check your email</h2>
+        <p className="mt-2 text-sm text-slate-500 leading-relaxed">
+          We sent a password reset link to your email address. Check your inbox — it may take a minute.
+        </p>
+        <Link
+          href="/login"
+          className="mt-6 inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+        >
+          <ArrowLeft size={14} />
+          Back to sign in
+        </Link>
+      </div>
+    )
+  }
+
   return (
-    <div className="rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm p-8">
+    <div>
       <Link
         href="/login"
-        className="mb-5 flex items-center gap-1.5 text-sm text-slate-400 hover:text-white"
+        className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
       >
-        <ArrowLeft size={14} /> Back to login
+        <ArrowLeft size={14} />
+        Back to sign in
       </Link>
 
-      <h2 className="mb-2 text-xl font-semibold text-white">Reset your password</h2>
-      <p className="mb-6 text-sm text-slate-400">
-        Enter your email and we'll send you a reset link.
-      </p>
+      <div className="mb-7">
+        <h1 className="text-[22px] font-bold text-slate-900 tracking-tight">Reset your password</h1>
+        <p className="mt-1 text-sm text-slate-500">
+          Enter your email and we'll send you a reset link.
+        </p>
+      </div>
 
-      {sent ? (
-        <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <CheckCircle className="h-10 w-10 text-emerald-400" />
-          <p className="text-sm text-slate-300">
-            Check your email for the reset link. It may take a minute.
-          </p>
-        </div>
-      ) : (
-        <form action={handleSubmit} className="flex flex-col gap-4">
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            label="Email address"
-            placeholder="you@company.com"
-            required
-            className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:ring-sky-400"
-          />
+      <form action={handleSubmit} className="space-y-4">
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          label="Email address"
+          placeholder="you@company.com"
+          required
+          autoComplete="email"
+        />
 
-          {error && (
-            <p className="rounded-md bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-400">
-              {error}
-            </p>
-          )}
+        {error && (
+          <div className="flex items-start gap-2.5 rounded-lg bg-red-50 border border-red-100 px-3.5 py-3">
+            <AlertCircle size={15} className="mt-0.5 flex-shrink-0 text-red-500" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
+        )}
 
-          <Button type="submit" loading={isPending} className="mt-1 w-full">
-            {isPending ? 'Sending…' : 'Send reset link'}
-          </Button>
-        </form>
-      )}
+        <Button type="submit" loading={isPending} className="w-full">
+          {isPending ? 'Sending…' : 'Send reset link'}
+        </Button>
+      </form>
     </div>
   )
 }
