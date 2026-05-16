@@ -1,23 +1,44 @@
 @import "tailwindcss";
 
 :root {
+  /* Primary — Indigo (premium financial feel) */
+  --primary: #6366f1;
+  --primary-dark: #4f46e5;
+  --primary-light: #eef2ff;
+  --primary-ring: rgb(99 102 241 / 0.15);
+
+  /* Layout surfaces */
   --background: #f8fafc;
-  --foreground: #0f172a;
+  --surface: #ffffff;
   --sidebar-bg: #0f172a;
-  --sidebar-fg: #cbd5e1;
-  --sidebar-active: #1e293b;
-  --sidebar-accent: #38bdf8;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
-  --primary: #0ea5e9;
-  --primary-hover: #0284c7;
+
+  /* Borders */
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  /* Text scale */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Semantic colours */
+  --success: #10b981;
+  --success-bg: #ecfdf5;
+  --warning: #f59e0b;
+  --warning-bg: #fffbeb;
   --destructive: #ef4444;
-  --muted: #94a3b8;
-  --muted-bg: #f1f5f9;
-  --radius: 0.5rem;
+  --destructive-bg: #fef2f2;
+
+  /* Shadow system */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.04);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
 }
 
-* {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -25,9 +46,11 @@
 
 body {
   background-color: var(--background);
-  color: var(--foreground);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
 .scrollbar-thin {
