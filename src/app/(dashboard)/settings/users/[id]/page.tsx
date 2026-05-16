@@ -1,4 +1,4 @@
-import { getRoles, getUsers } from '@/actions/users'
+import { getRoles, getUserById } from '@/actions/users'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { UserForm } from '@/components/users/user-form'
 import { notFound } from 'next/navigation'
@@ -9,11 +9,11 @@ interface Props {
 
 export default async function EditUserPage({ params }: Props) {
   const { id } = await params
-  const [usersResult, rolesResult] = await Promise.all([getUsers(), getRoles()])
+  const [userResult, rolesResult] = await Promise.all([getUserById(id), getRoles()])
 
-  const user = usersResult.data?.find(u => u.id === id)
-  if (!user) notFound()
+  if (!userResult.success || !userResult.data) notFound()
 
+  const user = userResult.data
   const roles = rolesResult.data ?? []
 
   return (

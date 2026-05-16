@@ -25,7 +25,7 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
@@ -39,7 +39,7 @@ BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SET search_path = '';
 
 DROP TRIGGER IF EXISTS profiles_updated_at ON public.profiles;
 CREATE TRIGGER profiles_updated_at
@@ -111,7 +111,7 @@ RETURNS BOOLEAN AS $$
     JOIN public.roles r ON r.id = ur.role_id
     WHERE ur.user_id = auth.uid() AND r.name = 'admin'
   );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = '';
 
 -- Profiles policies
 CREATE POLICY "Users can view own profile"
@@ -133,7 +133,7 @@ CREATE POLICY "Admins can delete profiles"
 -- Roles policies
 CREATE POLICY "Authenticated can view roles"
   ON public.roles FOR SELECT
-  USING (auth.role() = 'authenticated');
+  USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Admins can manage roles"
   ON public.roles FOR ALL
@@ -143,11 +143,11 @@ CREATE POLICY "Admins can manage roles"
 -- Permissions policies
 CREATE POLICY "Authenticated can view permissions"
   ON public.permissions FOR SELECT
-  USING (auth.role() = 'authenticated');
+  USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Authenticated can view role_permissions"
   ON public.role_permissions FOR SELECT
-  USING (auth.role() = 'authenticated');
+  USING (auth.uid() IS NOT NULL);
 
 CREATE POLICY "Admins can manage role_permissions"
   ON public.role_permissions FOR ALL

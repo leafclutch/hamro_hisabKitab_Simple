@@ -5,6 +5,15 @@ import { createClient } from '@/lib/supabase/server'
 import type { ActionResult, UserWithRoles, Role } from '@/types'
 import { revalidatePath } from 'next/cache'
 
+async function requireAdmin(): Promise<{ error: string } | null> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+  const { data: isAdmin } = await supabase.rpc('is_admin')
+  if (!isAdmin) return { error: 'Forbidden' }
+  return null
+}
+
 export async function getUsers(): Promise<ActionResult<UserWithRoles[]>> {
   try {
     const supabase = await createClient()
@@ -43,11 +52,14 @@ export async function getRoles(): Promise<ActionResult<Role[]>> {
 }
 
 export async function createUser(formData: FormData): Promise<ActionResult<{ id: string }>> {
+  const authError = await requireAdmin()
+  if (authError) return { success: false, error: authError.error }
+
   const email = formData.get('email') as string
   const fullName = formData.get('full_name') as string
   const phone = formData.get('phone') as string | null
   const password = formData.get('password') as string
-  const roleId = formData.get('role_id') as string | null
+  const roleId = (formData.get('role_id') as string) || null
 
   if (!email || !fullName || !password) {
     return { success: false, error: 'Email, name, and password are required' }
@@ -96,10 +108,13 @@ export async function updateUser(
   userId: string,
   formData: FormData
 ): Promise<ActionResult> {
+  const authError = await requireAdmin()
+  if (authError) return { success: false, error: authError.error }
+
   const fullName = formData.get('full_name') as string
   const phone = formData.get('phone') as string | null
   const isActive = formData.get('is_active') === 'true'
-  const roleId = formData.get('role_id') as string | null
+  const roleId = (formData.get('role_id') as string) || null
 
   if (!fullName) return { success: false, error: 'Name is required' }
 
@@ -130,6 +145,9 @@ export async function updateUser(
 }
 
 export async function deleteUser(userId: string): Promise<ActionResult> {
+  const authError = await requireAdmin()
+  if (authError) return { success: false, error: authError.error }
+
   try {
     const admin = createAdminClient()
 
@@ -141,5 +159,33 @@ export async function deleteUser(userId: string): Promise<ActionResult> {
     return { success: true }
   } catch {
     return { success: false, error: 'Failed to delete user' }
+  }
+}
+
+export async function getUserById(id: string): Promise<ActionResult<UserWithRoles>> {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('profiles')
+      .select(`
+        *,
+        roles:user_roles(
+          role:roles(*)
+        )
+      `)
+      .eq('id', id)
+      .single()
+
+    if (error) return { success: false, error: error.message }
+    if (!data) return { success: false, error: 'User not found' }
+
+    const user = {
+      ...data,
+      roles: (data.roles ?? []).map((r: any) => r.role).filter(Boolean),
+    }
+
+    return { success: true, data: user }
+  } catch {
+    return { success: false, error: 'Failed to fetch user' }
   }
 }
