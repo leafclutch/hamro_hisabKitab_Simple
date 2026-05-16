@@ -12,32 +12,39 @@ export default async function UsersPage() {
   const users = result.data ?? []
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-5 max-w-[1100px]">
+      <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Users</h1>
-          <p className="text-sm text-slate-500">Manage system users and their roles.</p>
+          <h1 className="text-[20px] font-semibold text-slate-900 tracking-tight">Users</h1>
+          <p className="text-sm text-slate-400 mt-0.5">
+            {users.length} team member{users.length !== 1 ? 's' : ''} · manage access and roles
+          </p>
         </div>
         <Link href="/settings/users/new">
           <Button>
-            <UserPlus size={16} />
+            <UserPlus size={14} />
             Add user
           </Button>
         </Link>
       </div>
 
       {result.error && (
-        <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+        <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3 text-sm text-red-700">
           {result.error}
         </div>
       )}
 
       <Card>
         <CardHeader>
-          <h2 className="font-semibold text-slate-800">All users</h2>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Team members</h2>
+            <p className="text-xs text-slate-400 mt-0.5">Users with access to this system</p>
+          </div>
         </CardHeader>
-        <CardContent>
-          <UserTable users={users} />
+        <CardContent className="p-0 pb-1">
+          <div className="px-5 pt-4">
+            <UserTable users={users} />
+          </div>
         </CardContent>
       </Card>
     </div>

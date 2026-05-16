@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Modal } from '@/components/ui/modal'
-import { AlertTriangle } from 'lucide-react'
+import { TriangleAlert } from 'lucide-react'
 
 interface DeleteUserDialogProps {
   open: boolean
@@ -12,14 +12,14 @@ interface DeleteUserDialogProps {
 
 export function DeleteUserDialog({ open, userName, onClose, onConfirm, loading }: DeleteUserDialogProps) {
   return (
-    <Modal open={open} onClose={onClose} title="Delete user">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-lg bg-red-50 p-4">
-          <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
+    <Modal open={open} onClose={onClose} title="Delete user account">
+      <div className="space-y-4">
+        <div className="flex gap-3 rounded-xl bg-red-50 border border-red-100 p-4">
+          <TriangleAlert className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
           <div>
-            <p className="font-medium text-red-800">This action cannot be undone</p>
-            <p className="mt-0.5 text-sm text-red-600">
-              You are about to permanently delete <strong>{userName}</strong> and all their data.
+            <p className="text-sm font-semibold text-red-800">This cannot be undone</p>
+            <p className="mt-1 text-sm text-red-600 leading-relaxed">
+              Deleting <strong className="font-semibold">{userName}</strong> will permanently remove their account and all associated data.
             </p>
           </div>
         </div>
@@ -28,7 +28,7 @@ export function DeleteUserDialog({ open, userName, onClose, onConfirm, loading }
             Cancel
           </Button>
           <Button variant="destructive" onClick={onConfirm} loading={loading}>
-            Delete user
+            Delete account
           </Button>
         </div>
       </div>
