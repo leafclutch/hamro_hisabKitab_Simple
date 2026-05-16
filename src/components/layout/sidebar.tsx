@@ -59,10 +59,10 @@ function NavLink({
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-indigo-400 rounded-r-full" />
       )}
       <Icon
-        size={16}
+        size={18}
         className={cn(
           'flex-shrink-0 transition-colors',
-          active ? 'text-indigo-400' : 'text-slate-500'
+          active ? 'text-indigo-400' : 'text-slate-400'
         )}
       />
       {!collapsed && <span className="truncate leading-none">{label}</span>}
