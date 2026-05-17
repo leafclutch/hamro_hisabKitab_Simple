@@ -25,10 +25,11 @@ CREATE POLICY "Auth users read training_batches"
 CREATE POLICY "Auth users insert training_batches"
   ON public.training_batches FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Auth users update training_batches"
-  ON public.training_batches FOR UPDATE TO authenticated USING (auth.uid() IS NOT NULL);
+  ON public.training_batches FOR UPDATE TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admins delete training_batches"
   ON public.training_batches FOR DELETE TO authenticated USING (public.is_admin());
 
+DROP TRIGGER IF EXISTS update_training_batches_updated_at ON public.training_batches;
 CREATE TRIGGER update_training_batches_updated_at
   BEFORE UPDATE ON public.training_batches
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -59,10 +60,11 @@ CREATE POLICY "Auth users read students"
 CREATE POLICY "Auth users insert students"
   ON public.students FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Auth users update students"
-  ON public.students FOR UPDATE TO authenticated USING (auth.uid() IS NOT NULL);
+  ON public.students FOR UPDATE TO authenticated USING (auth.uid() IS NOT NULL) WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admins delete students"
   ON public.students FOR DELETE TO authenticated USING (public.is_admin());
 
+DROP TRIGGER IF EXISTS update_students_updated_at ON public.students;
 CREATE TRIGGER update_students_updated_at
   BEFORE UPDATE ON public.students
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
@@ -114,3 +116,10 @@ CREATE POLICY "Auth users insert training_expenses"
   ON public.training_expenses FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "Admins delete training_expenses"
   ON public.training_expenses FOR DELETE TO authenticated USING (public.is_admin());
+
+-- Indexes on foreign key columns for query performance
+CREATE INDEX IF NOT EXISTS idx_students_batch_id ON public.students(batch_id);
+CREATE INDEX IF NOT EXISTS idx_student_payments_student_id ON public.student_payments(student_id);
+CREATE INDEX IF NOT EXISTS idx_student_payments_payment_date ON public.student_payments(payment_date);
+CREATE INDEX IF NOT EXISTS idx_training_expenses_batch_id ON public.training_expenses(batch_id);
+CREATE INDEX IF NOT EXISTS idx_training_expenses_expense_date ON public.training_expenses(expense_date);
