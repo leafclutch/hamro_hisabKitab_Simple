@@ -13,7 +13,10 @@ const METHOD_LABELS: Record<string, string> = {
   cash: 'Cash', bank: 'Bank', esewa: 'eSewa', khalti: 'Khalti',
 }
 
-function fmt(n: number) { return `NPR ${n.toLocaleString('en-IN')}` }
+function fmt(n: number, currency = 'NPR') {
+  const sym: Record<string, string> = { NPR: 'NPR', INR: '₹', USD: '$', GBP: '£' }
+  return `${sym[currency] ?? currency} ${n.toLocaleString('en-IN')}`
+}
 
 export default async function StudentDetailPage({
   params,
@@ -61,17 +64,17 @@ export default async function StudentDetailPage({
         <CardContent className="p-5">
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="rounded-xl bg-slate-50 border border-slate-100 p-4 text-center">
-              <p className="text-xl font-bold text-slate-800">{fmt(student.effective_fee)}</p>
+              <p className="text-xl font-bold text-slate-800">{fmt(student.effective_fee, batch.currency)}</p>
               <p className="text-xs text-slate-400 mt-0.5">Total fee</p>
             </div>
             <div className="rounded-xl bg-indigo-50 border border-indigo-100 p-4 text-center">
-              <p className="text-xl font-bold text-indigo-700">{fmt(student.total_paid)} ({pct}%)</p>
+              <p className="text-xl font-bold text-indigo-700">{fmt(student.total_paid, batch.currency)} ({pct}%)</p>
               <p className="text-xs text-indigo-400 mt-0.5">Paid</p>
             </div>
             <div className={`rounded-xl border p-4 text-center ${isPaid ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
               {isPaid
                 ? <><CheckCircle2 size={20} className="text-emerald-500 mx-auto mb-1" /><p className="text-xs text-emerald-600 font-semibold">Fully paid</p></>
-                : <><p className="text-xl font-bold text-red-700">{fmt(student.balance)}</p><p className="text-xs text-red-400 mt-0.5">Remaining</p></>
+                : <><p className="text-xl font-bold text-red-700">{fmt(student.balance, batch.currency)}</p><p className="text-xs text-red-400 mt-0.5">Remaining</p></>
               }
             </div>
           </div>
@@ -114,7 +117,7 @@ export default async function StudentDetailPage({
                     <CheckCircle2 size={14} className="text-emerald-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-slate-800">{fmt(p.amount)}</p>
+                    <p className="text-sm font-medium text-slate-800">{fmt(p.amount, batch.currency)}</p>
                     <p className="text-xs text-slate-400">
                       {METHOD_LABELS[p.payment_method] ?? p.payment_method}
                       {p.installment_number ? ` · Installment #${p.installment_number}` : ''}

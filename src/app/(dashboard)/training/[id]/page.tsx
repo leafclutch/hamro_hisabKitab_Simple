@@ -55,7 +55,7 @@ function ProfitCard({ batch }: { batch: BatchWithStats }) {
   )
 }
 
-function StudentRow({ student, batchId }: { student: StudentWithPayments; batchId: string }) {
+function StudentRow({ student, batchId, currency }: { student: StudentWithPayments; batchId: string; currency: string }) {
   const pct = student.effective_fee > 0
     ? Math.round((student.total_paid / student.effective_fee) * 100)
     : 0
@@ -71,16 +71,16 @@ function StudentRow({ student, batchId }: { student: StudentWithPayments; batchI
         {student.status}
       </Badge>
       <div>
-        <p className="text-sm font-medium text-slate-700">{fmt(student.effective_fee)}</p>
+        <p className="text-sm font-medium text-slate-700">{fmt(student.effective_fee, currency)}</p>
         <p className="text-[11px] text-slate-400">Total fee</p>
       </div>
       <div>
-        <p className="text-sm font-medium text-emerald-600">{fmt(student.total_paid)}</p>
+        <p className="text-sm font-medium text-emerald-600">{fmt(student.total_paid, currency)}</p>
         <p className="text-[11px] text-slate-400">{pct}% paid</p>
       </div>
       <div>
         <p className={`text-sm font-medium ${isPaid ? 'text-emerald-600' : 'text-red-600'}`}>
-          {isPaid ? 'Cleared' : fmt(student.balance)}
+          {isPaid ? 'Cleared' : fmt(student.balance, currency)}
         </p>
         <p className="text-[11px] text-slate-400">Balance</p>
       </div>
@@ -93,12 +93,12 @@ function StudentRow({ student, batchId }: { student: StudentWithPayments; batchI
   )
 }
 
-function ExpenseRow({ expense }: { expense: TrainingExpense }) {
+function ExpenseRow({ expense, currency }: { expense: TrainingExpense; currency: string }) {
   return (
     <div className="grid grid-cols-[120px_1fr_100px_80px] gap-3 items-center px-4 py-3 hover:bg-slate-50/60 transition-colors">
       <Badge variant="default">{EXPENSE_LABELS[expense.category] ?? expense.category}</Badge>
       <p className="text-sm text-slate-600 truncate">{expense.description ?? '—'}</p>
-      <p className="text-sm font-medium text-amber-700">{fmt(expense.amount)}</p>
+      <p className="text-sm font-medium text-amber-700">{fmt(expense.amount, currency)}</p>
       <p className="text-xs text-slate-400">{new Date(expense.expense_date).toLocaleDateString('en-NP', { day: 'numeric', month: 'short' })}</p>
     </div>
   )
@@ -162,7 +162,7 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               ))}
             </div>
             <div className="divide-y divide-slate-100">
-              {students.map(s => <StudentRow key={s.id} student={s} batchId={id} />)}
+              {students.map(s => <StudentRow key={s.id} student={s} batchId={id} currency={batch.currency} />)}
             </div>
           </>
         ) : (
@@ -197,7 +197,7 @@ export default async function BatchDetailPage({ params }: { params: Promise<{ id
               ))}
             </div>
             <div className="divide-y divide-slate-100">
-              {expenses.map(e => <ExpenseRow key={e.id} expense={e} />)}
+              {expenses.map(e => <ExpenseRow key={e.id} expense={e} currency={batch.currency} />)}
             </div>
           </>
         ) : (

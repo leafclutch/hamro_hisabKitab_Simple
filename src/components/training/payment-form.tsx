@@ -23,6 +23,7 @@ export function PaymentForm({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const [formKey, setFormKey] = useState(0)
 
   async function handleSubmit(formData: FormData) {
     setError(null)
@@ -31,13 +32,14 @@ export function PaymentForm({
       if (!result.success) {
         setError(result.error ?? 'Failed to record payment')
       } else {
+        setFormKey(k => k + 1)
         router.refresh()
       }
     })
   }
 
   return (
-    <form action={handleSubmit} className="space-y-4">
+    <form key={formKey} action={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <Input
           id="amount"
