@@ -106,6 +106,7 @@ export async function createBatch(formData: FormData): Promise<ActionResult<Trai
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
 
   const { data, error } = await supabase
     .from('training_batches')
@@ -117,7 +118,7 @@ export async function createBatch(formData: FormData): Promise<ActionResult<Trai
       fee_per_student: parseFloat(formData.get('fee_per_student') as string) || 0,
       currency: (formData.get('currency') as string) || 'NPR',
       notes: (formData.get('notes') as string) || null,
-      created_by: user!.id,
+      created_by: user.id,
     })
     .select()
     .single()
@@ -155,6 +156,9 @@ export async function updateBatch(id: string, formData: FormData): Promise<Actio
 }
 
 export async function deleteBatch(id: string): Promise<ActionResult> {
+  const authErr = await requireAuth()
+  if (authErr) return { success: false, error: authErr.error }
+
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')
   if (!isAdmin) return { success: false, error: 'Forbidden' }
@@ -250,6 +254,7 @@ export async function createStudent(batchId: string, formData: FormData): Promis
 
   if (error) return { success: false, error: error.message }
   revalidatePath(`/training/${batchId}`)
+  revalidatePath('/training')
   return { success: true, data }
 }
 
@@ -282,11 +287,15 @@ export async function updateStudent(id: string, formData: FormData): Promise<Act
   if (existing) {
     revalidatePath(`/training/${existing.batch_id}`)
     revalidatePath(`/training/${existing.batch_id}/students/${id}`)
+    revalidatePath('/training')
   }
   return { success: true, data }
 }
 
 export async function deleteStudent(id: string): Promise<ActionResult> {
+  const authErr = await requireAuth()
+  if (authErr) return { success: false, error: authErr.error }
+
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')
   if (!isAdmin) return { success: false, error: 'Forbidden' }
@@ -295,6 +304,7 @@ export async function deleteStudent(id: string): Promise<ActionResult> {
   const { error } = await supabase.from('students').delete().eq('id', id)
   if (error) return { success: false, error: error.message }
   if (existing) revalidatePath(`/training/${existing.batch_id}`)
+  revalidatePath('/training')
   return { success: true }
 }
 
@@ -306,6 +316,7 @@ export async function addPayment(studentId: string, formData: FormData): Promise
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
   const { data: student } = await supabase
     .from('students').select('batch_id').eq('id', studentId).single()
 
@@ -320,7 +331,7 @@ export async function addPayment(studentId: string, formData: FormData): Promise
         ? parseInt(formData.get('installment_number') as string)
         : null,
       note: (formData.get('note') as string) || null,
-      recorded_by: user!.id,
+      recorded_by: user.id,
     })
     .select()
     .single()
@@ -329,11 +340,15 @@ export async function addPayment(studentId: string, formData: FormData): Promise
   if (student) {
     revalidatePath(`/training/${student.batch_id}`)
     revalidatePath(`/training/${student.batch_id}/students/${studentId}`)
+    revalidatePath('/training')
   }
   return { success: true, data }
 }
 
 export async function deletePayment(id: string): Promise<ActionResult> {
+  const authErr = await requireAuth()
+  if (authErr) return { success: false, error: authErr.error }
+
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')
   if (!isAdmin) return { success: false, error: 'Forbidden' }
@@ -351,6 +366,7 @@ export async function deletePayment(id: string): Promise<ActionResult> {
     const batchId = (payment.students as any).batch_id
     revalidatePath(`/training/${batchId}`)
     revalidatePath(`/training/${batchId}/students/${payment.student_id}`)
+    revalidatePath('/training')
   }
   return { success: true }
 }
@@ -378,6 +394,7 @@ export async function addExpense(batchId: string, formData: FormData): Promise<A
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { success: false, error: 'Unauthorized' }
 
   const { data, error } = await supabase
     .from('training_expenses')
@@ -387,17 +404,21 @@ export async function addExpense(batchId: string, formData: FormData): Promise<A
       description: (formData.get('description') as string) || null,
       amount: parseFloat(formData.get('amount') as string),
       expense_date: (formData.get('expense_date') as string) || new Date().toISOString().split('T')[0],
-      recorded_by: user!.id,
+      recorded_by: user.id,
     })
     .select()
     .single()
 
   if (error) return { success: false, error: error.message }
   revalidatePath(`/training/${batchId}`)
+  revalidatePath('/training')
   return { success: true, data }
 }
 
 export async function deleteExpense(id: string): Promise<ActionResult> {
+  const authErr = await requireAuth()
+  if (authErr) return { success: false, error: authErr.error }
+
   const supabase = await createClient()
   const { data: isAdmin } = await supabase.rpc('is_admin')
   if (!isAdmin) return { success: false, error: 'Forbidden' }
@@ -407,5 +428,6 @@ export async function deleteExpense(id: string): Promise<ActionResult> {
   const { error } = await supabase.from('training_expenses').delete().eq('id', id)
   if (error) return { success: false, error: error.message }
   if (expense) revalidatePath(`/training/${expense.batch_id}`)
+  revalidatePath('/training')
   return { success: true }
 }
