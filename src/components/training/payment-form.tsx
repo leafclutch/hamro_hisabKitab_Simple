@@ -4,6 +4,7 @@ import { addPayment } from '@/actions/training'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 
 const METHODS = [
   { value: 'cash', label: 'Cash' },
@@ -19,6 +20,7 @@ export function PaymentForm({
   studentId: string
   nextInstallment: number
 }) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
@@ -26,7 +28,11 @@ export function PaymentForm({
     setError(null)
     startTransition(async () => {
       const result = await addPayment(studentId, formData)
-      if (!result.success) setError(result.error ?? 'Failed to record payment')
+      if (!result.success) {
+        setError(result.error ?? 'Failed to record payment')
+      } else {
+        router.refresh()
+      }
     })
   }
 
