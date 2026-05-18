@@ -12,8 +12,7 @@ CREATE TABLE IF NOT EXISTS public.projects (
   client_name    TEXT          NOT NULL,
   client_email   TEXT,
   client_phone   TEXT,
-  contract_value NUMERIC(12,2) NOT NULL DEFAULT 0
-                               CHECK (contract_value > 0),
+  contract_value NUMERIC(12,2) NOT NULL DEFAULT 0,
   currency       TEXT          NOT NULL DEFAULT 'NPR',
   start_date     DATE,
   deadline       DATE,
