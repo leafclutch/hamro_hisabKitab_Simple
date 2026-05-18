@@ -118,3 +118,83 @@ export type BatchWithStats = TrainingBatch & {
   total_expenses: number  // sum of training_expenses
   net_profit: number      // total_revenue − total_expenses
 }
+
+// ─── Projects Module ──────────────────────────────────────────────────────────
+
+export type ProjectStatus = 'active' | 'completed' | 'cancelled'
+export type ProjectPaymentMethod = 'cash' | 'bank' | 'esewa' | 'khalti'
+export type ProjectPaymentType = 'advance' | 'installment' | 'final'
+export type ProjectExpenseCategory =
+  | 'subscription'
+  | 'hosting'
+  | 'api_cost'
+  | 'referral_commission'
+  | 'company_fund'
+  | 'my_commission'
+  | 'partner_commission'
+  | 'lunch'
+  | 'office_rent'
+  | 'utilities'
+  | 'misc'
+
+export type Project = {
+  id: string
+  name: string
+  client_name: string
+  client_email: string | null
+  client_phone: string | null
+  contract_value: number
+  currency: string
+  start_date: string | null
+  deadline: string | null
+  status: ProjectStatus
+  notes: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export type ProjectPayment = {
+  id: string
+  project_id: string
+  amount: number
+  payment_method: ProjectPaymentMethod
+  payment_type: ProjectPaymentType
+  payment_date: string
+  note: string | null
+  recorded_by: string
+  created_at: string
+}
+
+export type ProjectExpense = {
+  id: string
+  project_id: string
+  category: ProjectExpenseCategory
+  description: string | null
+  amount: number
+  expense_date: string
+  recorded_by: string
+  created_at: string
+}
+
+export type ProjectEmployeeAssignment = {
+  id: string
+  project_id: string
+  user_id: string
+  role_description: string | null
+  amount_paid: number
+  created_by: string
+  created_at: string
+  full_name?: string
+}
+
+export type ProjectWithStats = Project & {
+  payment_count: number
+  total_received: number
+  total_expenses: number
+  total_employee_costs: number
+  net_profit: number
+  payments: ProjectPayment[]
+  expenses: ProjectExpense[]
+  assignments: ProjectEmployeeAssignment[]
+}
