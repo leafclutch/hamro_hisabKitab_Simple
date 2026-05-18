@@ -3,13 +3,17 @@
 
 -- ── Tables ──────────────────────────────────────────────────────────────────
 
+-- NOTE: created_by/recorded_by use NOT NULL + ON DELETE RESTRICT (not SET NULL like training module)
+-- to preserve financial audit trail — a profile linked to financial records cannot be deleted.
+
 CREATE TABLE IF NOT EXISTS public.projects (
   id             UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   name           TEXT          NOT NULL,
   client_name    TEXT          NOT NULL,
   client_email   TEXT,
   client_phone   TEXT,
-  contract_value NUMERIC(12,2) NOT NULL DEFAULT 0,
+  contract_value NUMERIC(12,2) NOT NULL DEFAULT 0
+                               CHECK (contract_value > 0),
   currency       TEXT          NOT NULL DEFAULT 'NPR',
   start_date     DATE,
   deadline       DATE,
@@ -24,7 +28,8 @@ CREATE TABLE IF NOT EXISTS public.projects (
 CREATE TABLE IF NOT EXISTS public.project_payments (
   id             UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   project_id     UUID          NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
-  amount         NUMERIC(12,2) NOT NULL,
+  amount         NUMERIC(12,2) NOT NULL
+                               CHECK (amount > 0),
   payment_method TEXT          NOT NULL DEFAULT 'cash'
                                CHECK (payment_method IN ('cash', 'bank', 'esewa', 'khalti')),
   payment_type   TEXT          NOT NULL DEFAULT 'installment'
@@ -45,7 +50,8 @@ CREATE TABLE IF NOT EXISTS public.project_expenses (
                                  'lunch', 'office_rent', 'utilities', 'misc'
                                )),
   description    TEXT,
-  amount         NUMERIC(12,2) NOT NULL,
+  amount         NUMERIC(12,2) NOT NULL
+                               CHECK (amount > 0),
   expense_date   DATE          NOT NULL DEFAULT CURRENT_DATE,
   recorded_by    UUID          NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
   created_at     TIMESTAMPTZ   NOT NULL DEFAULT now()
@@ -56,7 +62,8 @@ CREATE TABLE IF NOT EXISTS public.project_employee_assignments (
   project_id       UUID          NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
   user_id          UUID          NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
   role_description TEXT,
-  amount_paid      NUMERIC(12,2) NOT NULL DEFAULT 0,
+  amount_paid      NUMERIC(12,2) NOT NULL DEFAULT 0
+                               CHECK (amount_paid >= 0),
   created_by       UUID          NOT NULL REFERENCES public.profiles(id) ON DELETE RESTRICT,
   created_at       TIMESTAMPTZ   NOT NULL DEFAULT now()
 );
@@ -79,11 +86,21 @@ CREATE POLICY "project_payments_insert" ON public.project_payments FOR INSERT TO
 
 -- project_expenses (append-only — no UPDATE policy)
 CREATE POLICY "project_expenses_select" ON public.project_expenses FOR SELECT TO authenticated USING (auth.uid() IS NOT NULL);
-CREATE POLICY "project_expenses_insert" ON public.project_expenses FOR INSERT to authenticated WITH CHECK (auth.uid() IS NOT NULL);
+CREATE POLICY "project_expenses_insert" ON public.project_expenses FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL);
 
 -- project_employee_assignments (append-only — no UPDATE policy)
 CREATE POLICY "project_employee_assignments_select" ON public.project_employee_assignments FOR SELECT TO authenticated USING (auth.uid() IS NOT NULL);
 CREATE POLICY "project_employee_assignments_insert" ON public.project_employee_assignments FOR INSERT TO authenticated WITH CHECK (auth.uid() IS NOT NULL);
+
+-- DELETE policies (Admin-only — mirrors training module pattern)
+CREATE POLICY "Admins delete projects"
+  ON public.projects FOR DELETE TO authenticated USING (public.is_admin());
+CREATE POLICY "Admins delete project_payments"
+  ON public.project_payments FOR DELETE TO authenticated USING (public.is_admin());
+CREATE POLICY "Admins delete project_expenses"
+  ON public.project_expenses FOR DELETE TO authenticated USING (public.is_admin());
+CREATE POLICY "Admins delete project_employee_assignments"
+  ON public.project_employee_assignments FOR DELETE TO authenticated USING (public.is_admin());
 
 -- ── Indexes ───────────────────────────────────────────────────────────────────
 
