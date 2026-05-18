@@ -1,9 +1,10 @@
-import { getProject } from '@/actions/projects'
+import { getProject, deleteProjectPayment, deleteProjectExpense, deleteEmployeeAssignment } from '@/actions/projects'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/server'
 import type { ProjectEmployeeAssignment, ProjectExpense, ProjectPayment } from '@/types'
-import { ArrowLeft, Edit2, Plus, TrendingDown, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, Edit2, Plus, Trash2, TrendingDown, Users, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -38,6 +39,9 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
   const result = await getProject(id)
   if (!result.success || !result.data) notFound()
   const project = result.data
+
+  const supabase = await createClient()
+  const { data: isAdmin } = await supabase.rpc('is_admin')
 
   const profitPositive = project.net_profit >= 0
   const receivedPct = project.contract_value > 0
@@ -122,7 +126,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   <Badge variant="info" className="capitalize text-[10px]">{PAYMENT_TYPE_LABELS[p.payment_type]}</Badge>
                   <p className="text-xs text-slate-500">{METHOD_LABELS[p.payment_method]}</p>
                   <p className="text-sm text-slate-600 truncate">{p.note ?? '—'}</p>
-                  <p className="text-sm font-semibold text-emerald-700">{fmt(p.amount, project.currency)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-emerald-700">{fmt(p.amount, project.currency)}</p>
+                    {isAdmin && (
+                      <form action={deleteProjectPayment.bind(null, p.id) as unknown as (formData: FormData) => Promise<void>}>
+                        <button type="submit" className="text-slate-300 hover:text-red-500 transition-colors p-1 rounded" title="Delete">
+                          <Trash2 size={13} />
+                        </button>
+                      </form>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -163,7 +176,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                   <Badge variant="default">{EXPENSE_LABELS[e.category] ?? e.category}</Badge>
                   <p className="text-sm text-slate-600 truncate">{e.description ?? '—'}</p>
                   <p className="text-sm font-medium text-amber-700">{fmt(e.amount, project.currency)}</p>
-                  <p className="text-xs text-slate-400">{new Date(e.expense_date).toLocaleDateString('en-NP', { day: 'numeric', month: 'short' })}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-slate-400">{new Date(e.expense_date).toLocaleDateString('en-NP', { day: 'numeric', month: 'short' })}</p>
+                    {isAdmin && (
+                      <form action={deleteProjectExpense.bind(null, e.id) as unknown as (formData: FormData) => Promise<void>}>
+                        <button type="submit" className="text-slate-300 hover:text-red-500 transition-colors p-1 rounded" title="Delete">
+                          <Trash2 size={13} />
+                        </button>
+                      </form>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -203,7 +225,16 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                 <div key={a.id} className="grid grid-cols-[1fr_1fr_120px] gap-3 items-center px-4 py-3 hover:bg-slate-50/60 transition-colors">
                   <p className="text-sm font-medium text-slate-800">{a.full_name ?? 'Unknown'}</p>
                   <p className="text-sm text-slate-500 truncate">{a.role_description ?? '—'}</p>
-                  <p className="text-sm font-semibold text-violet-700">{fmt(a.amount_paid, project.currency)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-violet-700">{fmt(a.amount_paid, project.currency)}</p>
+                    {isAdmin && (
+                      <form action={deleteEmployeeAssignment.bind(null, a.id) as unknown as (formData: FormData) => Promise<void>}>
+                        <button type="submit" className="text-slate-300 hover:text-red-500 transition-colors p-1 rounded" title="Delete">
+                          <Trash2 size={13} />
+                        </button>
+                      </form>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

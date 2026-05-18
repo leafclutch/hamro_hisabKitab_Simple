@@ -11,7 +11,7 @@ interface ProjectFormProps {
   project?: Project
 }
 
-const CURRENCIES = ['NPR', 'INR', 'USD', 'GBP']
+const CURRENCIES = ['NPR', 'INR', 'USD', 'GBP', 'EUR']
 const STATUS_OPTIONS = [
   { value: 'active', label: 'Active', desc: 'In progress' },
   { value: 'completed', label: 'Completed', desc: 'Delivered' },
